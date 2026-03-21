@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fred Junior Ntwali — Identity & Cloud Security</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080c10;
+  --bg2: #0d1219;
+  --bg3: #111820;
+  --green: #00ff88;
+  --green2: #00cc6a;
+  --green-dim: rgba(0,255,136,0.08);
+  --green-border: rgba(0,255,136,0.2);
+  --text: #e2e8f0;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+  --accent: #00d4ff;
+  --accent2: #7c3aed;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Syne', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* CUSTOM CURSOR */
+.cursor {
+  width: 8px; height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transition: transform 0.1s ease;
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  width: 32px; height: 32px;
+  border: 1px solid rgba(0,255,136,0.4);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transition: all 0.15s ease;
+}
+
+/* SCANLINE OVERLAY */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* GRID BACKGROUND */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: linear-gradient(rgba(0,255,136,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,136,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* NAV */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 500;
+  padding: 1.25rem 3rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(8,12,16,0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--green-border);
+}
+
+.nav-logo {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--green);
+  letter-spacing: 0.05em;
+}
+
+.nav-logo span { color: var(--text-muted); }
+
+.nav-links {
+  display: flex;
+  gap: 2rem;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--green); }
+
+/* HERO */
+#hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 8rem 3rem 4rem;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.hero-prompt {
+  font-size: 0.75rem;
+  color: var(--green);
+  letter-spacing: 0.15em;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.2s;
+}
+
+.hero-prompt::before { content: '> '; color: var(--text-muted); }
+
+.hero-name {
+  font-family: var(--sans);
+  font-size: clamp(3rem, 8vw, 7rem);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.4s;
+}
+
+.hero-name .line1 { color: var(--text); display: block; }
+.hero-name .line2 { color: var(--green); display: block; }
+
+.hero-title {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.6s;
+}
+
+.hero-title .sep { color: var(--green); margin: 0 0.75rem; }
+
+.hero-desc {
+  max-width: 560px;
+  font-size: 0.85rem;
+  line-height: 1.9;
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.8s;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 1s;
+}
+
+.btn-primary {
+  padding: 0.75rem 1.75rem;
+  background: var(--green);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: none;
+  cursor: none;
+  transition: all 0.2s;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.btn-primary:hover { background: var(--green2); transform: translateY(-2px); }
+
+.btn-secondary {
+  padding: 0.75rem 1.75rem;
+  background: transparent;
+  color: var(--green);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 1px solid var(--green-border);
+  cursor: none;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover { background: var(--green-dim); border-color: var(--green); }
+
+.hero-stats {
+  position: absolute;
+  right: 3rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  opacity: 0;
+  animation: fadeIn 0.8s ease forwards 1.2s;
+}
+
+.stat {
+  text-align: right;
+  border-right: 2px solid var(--green-border);
+  padding-right: 1rem;
+}
+
+.stat-num {
+  font-family: var(--sans);
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--green);
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+/* SECTION COMMON */
+section {
+  position: relative;
+  z-index: 1;
+  padding: 6rem 3rem;
+}
+
+.section-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.section-tag {
+  font-size: 0.7rem;
+  color: var(--green);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.section-tag::before { content: '// '; color: var(--text-muted); }
+
+.section-title {
+  font-family: var(--sans);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 3rem;
+  letter-spacing: -0.02em;
+}
+
+/* DIVIDER */
+.divider {
+  border: none;
+  border-top: 1px solid var(--green-border);
+  margin: 0;
+}
+
+/* VIDEO SECTION */
+#intro { background: var(--bg2); }
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  aspect-ratio: 16/9;
+  background: var(--bg3);
+  border: 1px solid var(--green-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.video-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,255,136,0.02) 10px, rgba(0,255,136,0.02) 20px);
+}
+
+.video-placeholder {
+  text-align: center;
+  z-index: 1;
+}
+
+.video-play-icon {
+  width: 72px; height: 72px;
+  border: 2px solid var(--green);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: var(--green);
+  font-size: 1.5rem;
+}
+
+.video-placeholder p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  letter-spacing: 0.1em;
+}
+
+.video-corner {
+  position: absolute;
+  width: 20px; height: 20px;
+  border-color: var(--green);
+  border-style: solid;
+}
+.video-corner.tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.video-corner.tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+.video-corner.bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+.video-corner.br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+/* ABOUT */
+#about { background: var(--bg); }
+
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.about-text {
+  font-size: 0.9rem;
+  line-height: 2;
+  color: var(--text-dim);
+}
+
+.about-text p { margin-bottom: 1.25rem; }
+
+.about-text strong { color: var(--green); font-weight: 500; }
+
+.terminal-block {
+  background: var(--bg3);
+  border: 1px solid var(--green-border);
+  padding: 1.5rem;
+  font-size: 0.8rem;
+}
+
+.terminal-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--green-border);
+}
+
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot.r { background: #ff5f57; }
+.dot.y { background: #febc2e; }
+.dot.g { background: #28c840; }
+
+.term-line {
+  margin-bottom: 0.4rem;
+  color: var(--text-muted);
+}
+
+.term-line .prompt { color: var(--green); }
+.term-line .cmd { color: var(--text); }
+.term-line .out { color: var(--accent); padding-left: 1rem; display: block; }
+.term-line .out.grn { color: var(--green); }
+
+/* PROJECTS */
+#projects { background: var(--bg2); }
+
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.project-card {
+  background: var(--bg3);
+  border: 1px solid var(--green-border);
+  padding: 1.75rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  display: block;
+  cursor: none;
+}
+
+.project-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--green), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s ease;
+}
+
+.project-card:hover::before { transform: translateX(0); }
+.project-card:hover { border-color: var(--green); transform: translateY(-3px); }
+
+.project-number {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.15em;
+  margin-bottom: 0.75rem;
+}
+
+.project-name {
+  font-family: var(--sans);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+.project-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.8;
+  margin-bottom: 1.25rem;
+}
+
+.project-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tag {
+  font-size: 0.65rem;
+  padding: 0.25rem 0.6rem;
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid var(--green-border);
+  letter-spacing: 0.05em;
+}
+
+.project-link {
+  position: absolute;
+  top: 1.75rem;
+  right: 1.75rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  transition: color 0.2s;
+}
+
+.project-card:hover .project-link { color: var(--green); }
+
+/* CERTIFICATIONS */
+#certifications { background: var(--bg); }
+
+.certs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.cert-card {
+  border: 1px solid var(--green-border);
+  padding: 1.5rem;
+  background: var(--bg3);
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.cert-card:hover { border-color: var(--green); }
+
+.cert-status {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+}
+
+.cert-status.achieved {
+  background: rgba(0,255,136,0.1);
+  color: var(--green);
+  border: 1px solid var(--green-border);
+}
+
+.cert-status.progress {
+  background: rgba(0,212,255,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0,212,255,0.2);
+}
+
+.cert-name {
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
+.cert-issuer {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* EXPERIENCE */
+#experience { background: var(--bg2); }
+
+.exp-list { display: flex; flex-direction: column; gap: 2rem; }
+
+.exp-item {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 2rem;
+  padding: 2rem;
+  background: var(--bg3);
+  border: 1px solid var(--green-border);
+  transition: border-color 0.2s;
+}
+
+.exp-item:hover { border-color: var(--green); }
+
+.exp-meta { border-right: 1px solid var(--green-border); padding-right: 2rem; }
+
+.exp-period {
+  font-size: 0.7rem;
+  color: var(--green);
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+}
+
+.exp-company {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+}
+
+.exp-location {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.exp-role {
+  font-size: 0.75rem;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+  font-style: italic;
+}
+
+.exp-bullets {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.exp-bullets li {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.7;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.exp-bullets li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--green);
+}
+
+/* CONTACT */
+#contact { background: var(--bg); }
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.contact-intro {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 2;
+  margin-bottom: 2rem;
+}
+
+.social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.social-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg3);
+  border: 1px solid var(--green-border);
+  text-decoration: none;
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  transition: all 0.2s;
+  cursor: none;
+}
+
+.social-link:hover { border-color: var(--green); color: var(--green); }
+
+.social-link-icon { color: var(--green); font-size: 1rem; width: 20px; text-align: center; }
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.form-label {
+  font-size: 0.65rem;
+  color: var(--green);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.form-input, .form-textarea {
+  background: var(--bg3);
+  border: 1px solid var(--green-border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  padding: 0.75rem 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.form-input:focus, .form-textarea:focus { border-color: var(--green); }
+.form-textarea { resize: vertical; min-height: 120px; }
+
+.form-submit {
+  padding: 0.85rem 2rem;
+  background: var(--green);
+  color: var(--bg);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: none;
+  cursor: none;
+  transition: all 0.2s;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+
+.form-submit:hover { background: var(--green2); }
+
+/* FOOTER */
+footer {
+  padding: 2rem 3rem;
+  border-top: 1px solid var(--green-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+  background: var(--bg2);
+}
+
+.footer-copy {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.footer-copy span { color: var(--green); }
+
+.footer-domain {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+/* ANIMATIONS */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.blink { animation: blink 1s step-end infinite; color: var(--green); }
+
+/* SCROLL REVEAL */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 768px) {
+  nav { padding: 1rem 1.5rem; }
+  section { padding: 4rem 1.5rem; }
+  #hero { padding: 7rem 1.5rem 3rem; }
+  .hero-stats { display: none; }
+  .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .projects-grid { grid-template-columns: 1fr; }
+  .certs-grid { grid-template-columns: 1fr; }
+  .exp-item { grid-template-columns: 1fr; }
+  .exp-meta { border-right: none; border-bottom: 1px solid var(--green-border); padding-right: 0; padding-bottom: 1rem; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <div class="nav-logo"><span>~/</span>fredjuniorntwali</div>
+  <ul class="nav-links">
+    <li><a href="#intro">Intro</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#certifications">Certs</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-prompt">whoami</div>
+    <h1 class="hero-name">
+      <span class="line1">Fred Junior</span>
+      <span class="line2">Ntwali<span class="blink">_</span></span>
+    </h1>
+    <div class="hero-title">
+      Identity & Access Management
+      <span class="sep">//</span>
+      Cloud Security
+      <span class="sep">//</span>
+      DevSecOps
+    </div>
+    <p class="hero-desc">
+      IAM professional at Smith+Nephew building enterprise-grade identity security across Microsoft Entra ID, Active Directory, and AWS. CS graduate. Based in Wrocław, Poland.
+    </p>
+    <div class="hero-ctas">
+      <a href="#projects" class="btn-primary">View Projects</a>
+      <a href="#contact" class="btn-secondary">Get In Touch</a>
+      <a href="https://github.com/freeman250" target="_blank" class="btn-secondary">GitHub ↗</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Certifications</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">4</div>
+      <div class="stat-label">Projects</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">2+</div>
+      <div class="stat-label">Yrs Experience</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- INTRO VIDEO -->
+<section id="intro">
+  <div class="section-inner">
+    <div class="section-tag">Introduction</div>
+    <h2 class="section-title reveal">Meet Fred</h2>
+    <div class="video-wrapper reveal">
+      <div class="video-corner tl"></div>
+      <div class="video-corner tr"></div>
+      <div class="video-corner bl"></div>
+      <div class="video-corner br"></div>
+      <div class="video-placeholder">
+        <div class="video-play-icon">▶</div>
+        <p>// intro_video.mp4 — coming soon</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <div class="section-tag">About</div>
+    <h2 class="section-title reveal">Who I Am</h2>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        <p>I'm a <strong>Computer Science graduate</strong> and Identity & Access Management professional currently working at <strong>Smith+Nephew</strong>, a global medical technology company — managing enterprise access across Active Directory, Microsoft Entra ID, and ServiceNow.</p>
+        <p>I hold three security certifications — <strong>SC-300, CompTIA Security+, and SC-900</strong> — and I'm currently studying for AWS Solutions Architect Associate and AZ-104, pushing deeper into cloud infrastructure and Azure administration simultaneously.</p>
+        <p>Outside of work I build. I learn by doing — which means I've broken things in ways that taught me more than any course. My final-year engineering thesis designed and implemented a <strong>production-grade hybrid IAM framework</strong> integrating Microsoft Entra ID with on-premises Active Directory, validated against NIST SP 800-63 and ISO/IEC 27001.</p>
+        <p>I'm looking to move into <strong>cloud security, IAM engineering, DevOps, or DevSecOps</strong> — roles where security and infrastructure overlap.</p>
+      </div>
+      <div class="terminal-block reveal">
+        <div class="terminal-bar">
+          <div class="dot r"></div>
+          <div class="dot y"></div>
+          <div class="dot g"></div>
+        </div>
+        <div class="term-line"><span class="prompt">$ </span><span class="cmd">cat profile.json</span></div>
+        <div class="term-line"><span class="out">{</span></div>
+        <div class="term-line"><span class="out">&nbsp;&nbsp;"name": "Fred Junior Ntwali",</span></div>
+        <div class="term-line"><span class="out">&nbsp;&nbsp;"role": "IAM & Cloud Security",</span></div>
+        <div class="term-line"><span class="out">&nbsp;&nbsp;"location": "Wrocław, Poland",</span></div>
+        <div class="term-line"><span class="out">&nbsp;&nbsp;"degree": "BSc Information Technology",</span></div>
+        <div class="term-line"><span class="out">&nbsp;&nbsp;"focus": [</span></div>
+        <div class="term-line"><span class="out">&nbsp;&nbsp;&nbsp;&nbsp;"Cloud Security",</span></div>
+        <div class="term-line"><span class="out">&nbsp;&nbsp;&nbsp;&nbsp;"IAM Engineering",</span></div>
+        <div class="term-line"><span class="out">&nbsp;&nbsp;&nbsp;&nbsp;"DevSecOps",</span></div>
+        <div class="term-line"><span class="out">&nbsp;&nbsp;&nbsp;&nbsp;"DevOps"</span></div>
+        <div class="term-line"><span class="out">&nbsp;&nbsp;],</span></div>
+        <div class="term-line"><span class="out">&nbsp;&nbsp;"status": <span class="grn">"open_to_opportunities"</span></span></div>
+        <div class="term-line"><span class="out">}</span></div>
+        <div class="term-line" style="margin-top:0.75rem"><span class="prompt">$ </span><span class="cmd">_<span class="blink">|</span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- PROJECTS -->
+<section id="projects">
+  <div class="section-inner">
+    <div class="section-tag">Projects</div>
+    <h2 class="section-title reveal">What I've Built</h2>
+    <div class="projects-grid">
+
+      <a href="https://github.com/freeman250" target="_blank" class="project-card reveal">
+        <div class="project-link">↗</div>
+        <div class="project-number">01 // thesis</div>
+        <div class="project-name">Hybrid IAM Framework — Microsoft Entra & On-Prem AD</div>
+        <div class="project-desc">Designed and implemented a production-grade hybrid IAM framework integrating Microsoft Entra ID with on-premises Active Directory. Covered Entra Connect, Zero Trust, Conditional Access, MFA, RBAC, PIM, and Microsoft Sentinel. Tested against real attack vectors. Validated against NIST SP 800-63 and ISO/IEC 27001.</div>
+        <div class="project-tags">
+          <span class="tag">Microsoft Entra ID</span>
+          <span class="tag">Active Directory</span>
+          <span class="tag">Zero Trust</span>
+          <span class="tag">PIM</span>
+          <span class="tag">Sentinel</span>
+        </div>
+      </a>
+
+      <a href="https://github.com/freeman250/AWS-Cloud-Travel-App" target="_blank" class="project-card reveal">
+        <div class="project-link">↗</div>
+        <div class="project-number">02 // aws</div>
+        <div class="project-name">AWS Cloud Travel Journal Application</div>
+        <div class="project-desc">Cloud-native web application enabling users to record, organise, and share travel experiences securely in the cloud. Built and deployed entirely on AWS using cloud-native services for compute, storage, and identity.</div>
+        <div class="project-tags">
+          <span class="tag">AWS</span>
+          <span class="tag">Cloud Native</span>
+          <span class="tag">IAM</span>
+          <span class="tag">S3</span>
+        </div>
+      </a>
+
+      <a href="https://github.com/freeman250/vprofile-local" target="_blank" class="project-card reveal">
+        <div class="project-link">↗</div>
+        <div class="project-number">03 // infrastructure</div>
+        <div class="project-name">vProfile — Multi-Tier Java App: Local to AWS Lift & Shift</div>
+        <div class="project-desc">Provisioned a multi-tier Java application locally using Vagrant & VirtualBox with MySQL, Memcache, RabbitMQ, Tomcat, and Nginx. Then migrated the full stack to AWS EC2 via lift & shift, validating service connectivity across all tiers.</div>
+        <div class="project-tags">
+          <span class="tag">AWS EC2</span>
+          <span class="tag">Vagrant</span>
+          <span class="tag">Nginx</span>
+          <span class="tag">Tomcat</span>
+          <span class="tag">MySQL</span>
+        </div>
+      </a>
+
+      <a href="https://github.com/freeman250/secureme-Pro_Vault" target="_blank" class="project-card reveal">
+        <div class="project-link">↗</div>
+        <div class="project-number">04 // security tooling</div>
+        <div class="project-name">SecureMe Pro Vault — Python Security Tooling</div>
+        <div class="project-desc">Python-based security tooling focused on credential and access management. Built to automate and strengthen identity-related security operations — learning by building and breaking.</div>
+        <div class="project-tags">
+          <span class="tag">Python</span>
+          <span class="tag">Security</span>
+          <span class="tag">Automation</span>
+          <span class="tag">IAM</span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <div class="section-inner">
+    <div class="section-tag">Certifications</div>
+    <h2 class="section-title reveal">Credentials</h2>
+    <div class="certs-grid">
+
+      <div class="cert-card reveal">
+        <div class="cert-status achieved">✓ Achieved</div>
+        <div class="cert-name">SC-300 Identity & Access Administrator</div>
+        <div class="cert-issuer">Microsoft</div>
+      </div>
+
+      <div class="cert-card reveal">
+        <div class="cert-status achieved">✓ Achieved</div>
+        <div class="cert-name">CompTIA Security+</div>
+        <div class="cert-issuer">CompTIA</div>
+      </div>
+
+      <div class="cert-card reveal">
+        <div class="cert-status achieved">✓ Achieved</div>
+        <div class="cert-name">SC-900 Security, Compliance & Identity</div>
+        <div class="cert-issuer">Microsoft</div>
+      </div>
+
+      <div class="cert-card reveal">
+        <div class="cert-status progress">⟳ In Progress</div>
+        <div class="cert-name">AWS Solutions Architect Associate</div>
+        <div class="cert-issuer">Amazon Web Services</div>
+      </div>
+
+      <div class="cert-card reveal">
+        <div class="cert-status progress">⟳ In Progress</div>
+        <div class="cert-name">AZ-104 Microsoft Azure Administrator</div>
+        <div class="cert-issuer">Microsoft</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <div class="section-inner">
+    <div class="section-tag">Experience</div>
+    <h2 class="section-title reveal">Where I've Worked</h2>
+    <div class="exp-list">
+
+      <div class="exp-item reveal">
+        <div class="exp-meta">
+          <div class="exp-period">Mar 2025 — Present</div>
+          <div class="exp-company">Smith+Nephew</div>
+          <div class="exp-location">Wrocław, Poland · Hybrid</div>
+        </div>
+        <div class="exp-content">
+          <div class="exp-role">UAM Specialist</div>
+          <ul class="exp-bullets">
+            <li>Execute end-to-end User Access Management across enterprise systems via ServiceNow, Active Directory, and Microsoft Entra ID</li>
+            <li>Administer AD and Entra ID — managing user objects, security groups, RBAC assignments, privileged accounts, and account recovery at enterprise scale</li>
+            <li>Investigate access-related incidents by analysing sign-in logs, audit logs, and access activity — supporting security reviews and incident triage</li>
+            <li>Perform access certifications and remediation, enforcing least-privilege principles across the identity estate</li>
+            <li>Mentor colleagues on complex IAM tasks and contribute to knowledge base documentation</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="exp-item reveal">
+        <div class="exp-meta">
+          <div class="exp-period">Mar 2025 — Nov 2025</div>
+          <div class="exp-company">Smith+Nephew</div>
+          <div class="exp-location">Wrocław, Poland · Hybrid</div>
+        </div>
+        <div class="exp-content">
+          <div class="exp-role">IT Service Desk Agent</div>
+          <ul class="exp-bullets">
+            <li>Managed end-to-end incident and service request lifecycle via ServiceNow within agreed KPIs and SLAs</li>
+            <li>Performed User Access Management tasks via ServiceNow, Active Directory, and Microsoft Entra ID</li>
+            <li>Diagnosed and resolved technical incidents at first contact, minimising escalations</li>
+            <li>Contributed to and maintained the ServiceNow Knowledge Base</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <div class="section-tag">Contact</div>
+    <h2 class="section-title reveal">Get In Touch</h2>
+    <div class="contact-grid">
+      <div class="reveal">
+        <p class="contact-intro">Open to opportunities in cloud security, IAM engineering, DevOps, and DevSecOps. Based in Wrocław, Poland — open to remote across the EU.</p>
+        <div class="social-links">
+          <a href="https://www.linkedin.com/in/ntwalifredjunior" target="_blank" class="social-link">
+            <span class="social-link-icon">in</span>
+            linkedin.com/in/ntwalifredjunior
+          </a>
+          <a href="https://github.com/freeman250" target="_blank" class="social-link">
+            <span class="social-link-icon">&lt;/&gt;</span>
+            github.com/freeman250
+          </a>
+          <a href="https://freeman250.com" class="social-link">
+            <span class="social-link-icon">◈</span>
+            freeman250.com
+          </a>
+        </div>
+      </div>
+      <form class="contact-form reveal" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" name="name" class="form-input" placeholder="Your name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" name="email" class="form-input" placeholder="your@email.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Message</label>
+          <textarea name="message" class="form-textarea" placeholder="What's on your mind?" required></textarea>
+        </div>
+        <button type="submit" class="form-submit">Send Message</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-copy">© 2026 <span>Fred Junior Ntwali</span> — Built with intention</div>
+  <div class="footer-domain">freeman250.com</div>
+</footer>
+
+<script>
+// Custom cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx - 4 + 'px';
+  cursor.style.top = my - 4 + 'px';
+});
+
+function animateRing() {
+  rx += (mx - rx - 16) * 0.15;
+  ry += (my - ry - 16) * 0.15;
+  ring.style.left = rx + 'px';
+  ring.style.top = ry + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => { cursor.style.transform = 'scale(2)'; ring.style.transform = 'scale(1.5)'; });
+  el.addEventListener('mouseleave', () => { cursor.style.transform = 'scale(1)'; ring.style.transform = 'scale(1)'; });
+});
+
+// Scroll reveal
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 80);
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(r => obs.observe(r));
+</script>
+</body>
+</html>
